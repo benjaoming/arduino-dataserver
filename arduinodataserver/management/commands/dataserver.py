@@ -84,9 +84,10 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
             
             data_received = ""
             
-            
+
     def finish(self):
         print "Connection closed"
+        super(MyTCPHandler, self).finish()
     
 class Command(BaseCommand):
     args = ('--dummy')
@@ -115,6 +116,7 @@ class Command(BaseCommand):
         HOST, PORT = addr, port
     
         # Create the server, binding to localhost on port 9999
+        SocketServer.TCPServer.allow_reuse_address = True
         server = SocketServer.TCPServer((HOST, PORT), MyTCPHandler)
 
         server_thread = threading.Thread(target=server.serve_forever, args=())

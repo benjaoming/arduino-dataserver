@@ -54,9 +54,13 @@ Arduino test script
 UNFINISHED. Connect to the server and send some data:
 
     /*
-      Arduino Data Server example
-    
-      Example based on Tom Igoe's Telnet Client sketch.
+      Telnet client
+     
+     This sketch showcases an incremental 
+     counter sending data to arduino-dataserver every second.
+     
+     Based on Tom Igoe's sketchbook example "TelnetClient"
+     
      */
     
     #include <SPI.h>
@@ -71,9 +75,12 @@ UNFINISHED. Connect to the server and send some data:
     
     // Enter the IP address of the server you're connecting to:
     byte server[] = { 
-      192,168,100,2 }; 
+      192,168,100,1 }; 
     
-    int test_data = 0;
+    int meter_counter = 0;
+    int meter_id = 1;
+    
+    Client client(server, 9999);
     
     void setup() {
       // start the Ethernet connection:
@@ -82,10 +89,7 @@ UNFINISHED. Connect to the server and send some data:
       Serial.begin(9600);
       // give the Ethernet shield a second to initialize:
       delay(1000);
-      Serial.println("connecting...");
     }
-    
-    Client client(server, 9999);
     
     void loop()
     {
@@ -93,45 +97,35 @@ UNFINISHED. Connect to the server and send some data:
       delay(1000);
     
       // if you get a connection, report back via serial:
-      if (client.connect()) {
-        Serial.println("connected");
-      } 
-      else {
-        // if you didn't get a connection to the server:
-        Serial.println("connection failed");
-      }
-    
-    //  // if there are incoming bytes available 
-    //  // from the server, read them and print them:
-    //  char message_expected[] = "PING";
-    //  char msg[4] = "";
-    //  int i = 0;
-    //  while (client.available()) {
-    //    char c = client.read();
-    //    msg[i] = c;
-    //    i++;
-    //    if (msg == message_expected) {
-    //      break;
-    //    }
-    //  }
-    //  
-    //  
-    //  
-      // as long as there are bytes in the serial queue,
-      // read them and send them out the socket if it's open:
-      while (Serial.available() > 0) {
-        char inChar = Serial.read();
-        if (client.connected()) {
-          client.print(inChar); 
+      if (!client.connected()) {
+        Serial.println("Creating connection...");
+        if (client.connect()) {
+          Serial.println("Connection established");
+        }
+        else {
+          // if you didn't get a connection to the server:
+          Serial.println("connection failed");
+          client.stop();
+          return;
         }
       }
-    
-      client.print(test_data);
-      test_data++;
-      Serial.println(test_data);
-      delay(1000);
-    
-      Serial.println();
-      Serial.println("disconnecting.");
-      client.stop();
+      
+      // If the connection works, send data
+      if (client.connected()) {
+        client.print(meter_id);
+        client.print(":");
+        client.print(meter_counter);
+        client.print(";");
+      }
+      
+      // Increment test data no matter what. The arduino
+      // should keep collecting sensor data, disregarding
+      // the network's health.
+      meter_counter ++;
+      
+      // Simulate that the counter restarts
+      if (meter_counter > 1000) {
+        meter_counter = 1;
+      }
+      
     }

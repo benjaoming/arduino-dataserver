@@ -69,7 +69,7 @@ class Meter(models.Model):
             return data[0]
 
     def __unicode__(self):
-        return self.name
+        return "%s (ID %d)" % (self.name, self.id)
 
     class Meta:
         verbose_name = _(u"meter")
