@@ -1,0 +1,156 @@
+<!DOCTYPE html>{% load i18n dataplotting %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{% block dataserver_pagetitle %}{% trans "Django Data Server" %}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block dataserver_description %}{% trans "Here is a lot of dataserver" %}{% endblock %}">
+    <meta name="author" content="Benjamin Bach">
+
+    <!-- Le styles -->
+    <link href="{{ STATIC_URL }}arduinodataserver/css/bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .carousel .chartcontainer {
+        visibility: hidden;
+      }
+      .carousel .active .chartcontainer {
+        visibility: visible;
+      }
+    </style>
+    <link href="{{ STATIC_URL }}arduinodataserver/css/bootstrap.min.css" rel="stylesheet">
+    
+    <script src="{{ STATIC_URL }}arduinodataserver/js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      charts_redraw = new Array();
+    </script>
+    
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le fav and touch icons -->
+    <!--
+    <link rel="shortcut icon" href="{{ STATIC_URL }}dataserver/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="{{ STATIC_URL }}dataserver/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{{ STATIC_URL }}dataserver/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="{{ STATIC_URL }}dataserver/ico/apple-touch-icon-57-precomposed.png">
+    -->
+    
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">{% block dataserver_sitetitle %}{% trans "Django Data Server" %}{% endblock %}</a>
+          <div class="nav-collapse">
+            <ul class="nav">
+              <li class="active"><a href="#">{% trans "Overview" %}</a></li>
+              {% for meter_type in meter_types %}
+                <li><a href="#about">{{ meter_type.name }}</a></li>
+              {% endfor %}
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <!-- Main hero unit for a primary marketing message or call to action -->
+      <div class="hero-unit carousel" id="overview_carousel">
+        <div class="carousel-inner" style="margin: 0 10px; min-height: 300px; overflow: hidden;">
+          
+          {% for meter in slideshow_meters %}
+            <div class="item{% if forloop.first %} active{% endif %}">
+              <div style="padding-bottom: 50px; background-color: #FFF;">
+                {% google_chart meter.default_interval %}
+              </div>
+              <div class="carousel-caption">
+                <h4 class="span2">{{ meter.default_interval }}</h4>
+                <p class="pull-right">
+                  {% for interval_type in meter.intervaltype_set.all %}
+                  <a class="btn btn-primary">{{ interval_type.get_name_display|capfirst }} summary &raquo;</a>
+                  {% endfor %}
+                </p>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        <!-- Carousel nav -->
+        <a class="carousel-control left" href="#overview_carousel" data-slide="prev">&lsaquo;</a>
+        <a class="carousel-control right" href="#overview_carousel" data-slide="next">&rsaquo;</a>
+      </div>
+
+      <!-- Example row of columns -->
+      
+      <div class="row">
+      
+        {% for meter in meters %}
+        <div class="span4">
+          <h2>{{ meter }}</h2>
+          {{ meter.description|truncatewords:30|linebreaks }}
+          <table class="table">  
+            <tbody>  
+              <tr>  
+                <td>{% trans "Latest update" %}:</td>  
+                <td>{{ meter.get_latest_data.created|default:_("None") }}</td>  
+              </tr>  
+              <tr>  
+                <td>{% trans "Latest reading" %}:</td>  
+                <td>{{ meter.get_latest_data.data_point|default:_("None") }}</td>  
+              </tr>  
+              </tbody>
+            </table>
+          <p><a class="btn" href="#">View details &raquo;</a></p>
+        </div>
+        
+        {% endfor %}
+      
+      </div>
+
+      <hr>
+
+      <footer class="footer">
+        <p>&copy; Benjamin Bach 2012</p>
+        <p>{% trans "Django dataserver is an open source project under " %}<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a>.</p>
+        <p>{% trans "This is Django dataserver running on Twitter Bootstrap." %}</p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="{{ STATIC_URL }}dataserver/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+      $('.carousel').carousel({
+        interval: 100000000000000
+      });
+      $('.carousel').bind('slid', function() {
+        active_chart = $(this).find('.active .chartcontainer');
+        func_and_args = charts_redraw[active_chart.attr('id')];
+        if (func_and_args) {
+          func_and_args[0].draw(func_and_args[1], func_and_args[2]);
+          //charts_redraw[active_chart.attr('id')] = null;
+          active_chart.fadeIn('fast');
+        }
+      });
+    </script>
+    
+  </body>
+</html>
+
