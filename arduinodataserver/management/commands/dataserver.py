@@ -33,6 +33,8 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
             
             data_received += self.data
             values_received = data_received.split(";")
+            if len(data_received) > 20:
+                return
             if not values_received or not "" == values_received[-1]:
                 continue
             values_received = filter(lambda x: x!="", values_received)
