@@ -17,9 +17,7 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
     """
 
     def handle(self):
-        # self.request is the TCP socket connected to the client
         print "Got connection"
-        #self.request.sendall("PING")
 
         data_received = ""
         last_count_received = 0
@@ -28,12 +26,11 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
         while True:
             time.sleep(0.1)
             self.data = self.request.recv(1024).strip()
-            print "{} wrote:".format(self.client_address[0])
-            print self.data
+            print "Received connection from %s" % str(self.client_address[0])
             
             data_received += self.data
             values_received = data_received.split(";")
-            if len(data_received) > 20:
+            if len(data_received) > 30:
                 return
             if not values_received or not "" == values_received[-1]:
                 continue
@@ -103,10 +100,10 @@ class Command(BaseCommand):
                     help='Specify a file to put our process ID in (for daemon mode)'),
         make_option('--addr', action='store', dest='addr',
                     default="localhost", 
-                    help='Specify a file to put our process ID in (for daemon mode)'),
+                    help='Specify the ip address to listen to.'),
         make_option('--port', '-p', action='store', dest='port',
                     default="9999", 
-                    help='Specify a file to put our process ID in (for daemon mode)'),
+                    help='Specify a TCP port for listening.'),
         )
     def handle(self, *args, **options):
         
