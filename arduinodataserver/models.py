@@ -79,8 +79,8 @@ class MeterData(models.Model):
     
     meter = models.ForeignKey(Meter)
     data_point = models.FloatField()
-    diff = models.IntegerField(help_text=_(u"This field contains the difference (delta) from the last reading. It is used if the meter is an incremental counter. If you do not fill it out, it is filled out automatically"),
-                               blank=True, null=True)
+    diff = models.FloatField(help_text=_(u"This field contains the difference (delta) from the last reading. It is used if the meter is an incremental counter. If you do not fill it out, it is filled out automatically"),
+                             blank=True, null=True)
     created = models.DateTimeField()
     
     def save(self, *args, **kwargs):

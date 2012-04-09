@@ -1,13 +1,13 @@
-# encoding: utf-8
+# -*- coding: utf-8 -*-
 import datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
 
+
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
         # Adding model 'MeterType'
         db.create_table('arduinodataserver_metertype', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -31,7 +31,7 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('meter', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['arduinodataserver.Meter'])),
             ('data_point', self.gf('django.db.models.fields.FloatField')()),
-            ('diff', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
+            ('diff', self.gf('django.db.models.fields.FloatField')(null=True, blank=True)),
             ('created', self.gf('django.db.models.fields.DateTimeField')()),
         ))
         db.send_create_signal('arduinodataserver', ['MeterData'])
@@ -71,9 +71,7 @@ class Migration(SchemaMigration):
         # Adding unique constraint on 'Interval', fields ['interval_type', 'from_time']
         db.create_unique('arduinodataserver_interval', ['interval_type_id', 'from_time'])
 
-
     def backwards(self, orm):
-        
         # Removing unique constraint on 'Interval', fields ['interval_type', 'from_time']
         db.delete_unique('arduinodataserver_interval', ['interval_type_id', 'from_time'])
 
@@ -94,7 +92,6 @@ class Migration(SchemaMigration):
 
         # Deleting model 'Interval'
         db.delete_table('arduinodataserver_interval')
-
 
     models = {
         'arduinodataserver.interval': {
@@ -131,7 +128,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'MeterData'},
             'created': ('django.db.models.fields.DateTimeField', [], {}),
             'data_point': ('django.db.models.fields.FloatField', [], {}),
-            'diff': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'diff': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'meter': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['arduinodataserver.Meter']"})
         },
