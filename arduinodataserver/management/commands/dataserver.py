@@ -20,7 +20,6 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
         print "Got connection"
 
         data_received = ""
-        last_count_received = 0
         last_count_inserted = {}
         
         while True:
@@ -54,8 +53,7 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
                     if meter_count > latest_data_count:
                         insert_count = meter_count
                     else:
-                        insert_count = latest_data_count + meter_count - last_count_received
-                    last_count_received = meter_count
+                        insert_count = meter_count - latest_data_count
                         
                     data = models.MeterData(data_point=insert_count,
                                             meter=default_meter,
@@ -86,7 +84,7 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
 
     def finish(self):
         print "Connection closed"
-        super(MyTCPHandler, self).finish()
+        return MyTCPHandler.finish(self)
     
 class Command(BaseCommand):
     args = ('--dummy')

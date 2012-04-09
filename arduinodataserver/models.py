@@ -18,7 +18,7 @@ INTERVALS = [
     (INTERVAL_DAILY,    _('daily')),
     (INTERVAL_WEEKLY,   _('weekly')),
     (INTERVAL_MONTHLY,  _('monthly')),
-    (INTERVAL_ANNUALLY, _('annually')),
+    (INTERVAL_ANNUALLY, _('annual')),
 ]
 
 INTERVAL_XAXIS = {
