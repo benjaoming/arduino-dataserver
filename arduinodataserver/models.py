@@ -63,6 +63,9 @@ class Meter(models.Model):
     
     description = models.TextField(blank=True)
     
+    unit_name = models.CharField(max_length=255, help_text=_(u"Name the unit that's being summarised, for instance 'KWh'."), blank=True, null=True)
+    unit_fraction = models.FloatField(default=1, help_text=_(u"If you are doing an annual summary, you might want to use a different unit than theone from the data entries. If for instance, you are receiving KWh data, you could enter 0.001 and input 'MWh' in the 'unit name' field. Note that this fraction will be applied to ALL meters in the summary, so they should be outputting the same type of unit."))
+
     def get_latest_data(self):
         data = self.meterdata_set.all().order_by('-created')
         if data:
@@ -110,7 +113,7 @@ class IntervalType(models.Model):
     meter_set = models.ManyToManyField(Meter, help_text=_(u"Choose multiple meters if you want this to be a summary of multiple meters. Please note that this would require the units of these meters to be the same!"), 
                                        blank=True)
     unit_name = models.CharField(max_length=255, help_text=_(u"Name the unit that's being summarised, for instance 'KWh'."))
-    unit_fraction = models.FloatField(default=1, help_text=_(u"If you are doing an annual summary, you might want to use a different unit than the one from the data entries. If for instance, you are receiving KWh data, you could enter 0.001 and input 'MWh' in the 'unit name' field."))
+    unit_fraction = models.FloatField(default=1, help_text=_(u"If you are doing an annual summary, you might want to use a different unit than the one from the data entries. If for instance, you are receiving KWh data, you could enter 0.001 and input 'MWh' in the 'unit name' field. Note that this fraction will be applied to ALL meters in the summary, so they should be outputting the same type of unit."))
     
     backlog = models.IntegerField(default=0, verbose_name=_(u"Backlog"),
                                   help_text=_(u"Number of days to keep old entries for. If you create a new summary and have the necessary data entries, summaries will be created until this point in time."))

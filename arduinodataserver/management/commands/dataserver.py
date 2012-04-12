@@ -19,9 +19,9 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
     def handle(self):
         print "Got connection"
 
-        data_received = ""
-        last_count_inserted = {}
-        base_offset = {}
+        data_received = "" # Store data from network
+        last_count_inserted = {} # Buffer for latest values received from each meter
+        base_offset = {} # Base offset received from database, in case meter resets and database should keep counting upwards
         
         while True:
             time.sleep(0.1)
@@ -29,59 +29,86 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
             print "Received connection from %s" % str(self.client_address[0])
             
             data_received += self.data
+            
+            # Split values at our termination character
             values_received = data_received.split(";")
-            if len(data_received) > 30:
+            
+            # Secure against data overflow / dos attacks
+            # In case we get too much data, just drop the connection
+            if len(data_received) > 50:
                 return
+            
+            # If we have not concluded receiving
             if not values_received or not "" == values_received[-1]:
                 continue
+            
+            # Throw away empty stuff
             values_received = filter(lambda x: x!="", values_received)
             
+            # Iterate the values
             for value in values_received:
                 try:
+                    
+                    # Values received: "meter_id:meter_value", ie. "1:1;"
                     meter_id, meter_count = value.split(":")
-                    meter_count = int(meter_count)
                     
                     meter = models.Meter.objects.get(id=int(meter_id))
+                    meter_count = float(meter_count)
+                    
+                    # Factor in some fraction to the unit that the meter has specified.
+                    meter_count = meter_count * meter.unit_fraction
+                    
+                    # Check if we have a cached value - if not, find latest entry in database
                     if not last_count_inserted.get(meter_id, None):
+                        
+                        diff = 1 # diff since last value
+                        insert_count = 0 # the value to insert
+                        latest_data_count = 0 # the latest value received from meter
+
+                        # Find the latest data received in database
                         latest_data = models.MeterData.objects.filter(meter=meter).order_by('-id')
-                        diff = 1
-                        insert_count = 0
-                        latest_data_count = 0
+                        
                         if latest_data:
                             base_offset[meter_id] = latest_data[0].data_point
-                            latest_data_count = 0 #latest_data[0].data_point
                         else:
                             base_offset[meter_id] = 0
                         
+                        # If database counter is ahead, then the meter must have been resting
                         if meter_count < base_offset[meter_id]:
                             insert_count = base_offset[meter_id] + 1
                             diff = 1
+                        
+                        # If meter is ahead of database, then the server must have been resting
                         else:
                             insert_count = meter_count
                             diff = meter_count - base_offset[meter_id]
-                        
+                    
+                    # Meter data already in last_count_inserted buffer
                     else:
                         
+                        # If the meter is ahead (normal case)
                         if meter_count > latest_data_count:
                             latest_data_count = last_count_inserted[meter_id]
                             insert_count = meter_count - latest_data_count + base_offset[meter_id]
                             diff = insert_count - latest_data_count
                         
+                        # Meter must have reset itself!
                         else:
-                            # Meter must have reset itself!
-                            latest_data_count = last_count_inserted[meter_id]
                             insert_count = meter_count + base_offset[meter_id]
-                            diff = insert_count - latest_data_count
-                        
+                            diff = 1
+                    
+                    # Insert data
+                    print "Inserting value %d - received value %d" % (insert_count, meter_count)
                     data = models.MeterData(data_point=insert_count,
                                             meter=meter,
                                             created = datetime.now(),
-                                            diff=diff)
+                                            diff = diff)
 
+                    data.save()
+
+                    # Store values
                     last_count_inserted[meter_id] = meter_count
                     base_offset[meter_id] = insert_count
-                    print "Inserting value %d - received value %d" % (insert_count, meter_count)
-                    data.save()
                     
                 except ValueError:
                     print "Not an integer", value
@@ -126,15 +153,8 @@ class Command(BaseCommand):
         
         HOST, PORT = addr, port
     
-        # Create the server, binding to localhost on port 9999
-        SocketServer.TCPServer.allow_reuse_address = True
-        server = SocketServer.TCPServer((HOST, PORT), MyTCPHandler)
-
-        server_thread = threading.Thread(target=server.serve_forever, args=())
-        server_thread.setDaemon(True)
-        server_thread.start()
-
         # Run as daemon, ie. fork the process
+        # TODO: Make this a proper daemon mode following python standards...
         if daemon:
             fpid = os.fork()
             if fpid!=0:
@@ -143,6 +163,14 @@ class Command(BaseCommand):
                 pid_file.write(str(fpid))
                 pid_file.close()
                 sys.exit(0)
+
+        # Create the server, binding to localhost on port 9999
+        SocketServer.TCPServer.allow_reuse_address = True
+        server = SocketServer.TCPServer((HOST, PORT), MyTCPHandler)
+
+        server_thread = threading.Thread(target=server.serve_forever, args=())
+        server_thread.setDaemon(True)
+        server_thread.start()
 
         while True:
             try:
