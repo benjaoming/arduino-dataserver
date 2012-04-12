@@ -54,8 +54,8 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
                             base_offset[meter_id] = 0
                         
                         if meter_count < base_offset[meter_id]:
-                            insert_count = meter_count + base_offset[meter_id]
-                            diff = meter_count - latest_data_count
+                            insert_count = base_offset[meter_id] + 1
+                            diff = 1
                         else:
                             insert_count = meter_count
                             diff = meter_count - base_offset[meter_id]
