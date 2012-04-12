@@ -21,6 +21,7 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
 
         data_received = ""
         last_count_inserted = {}
+        base_offset = {}
         
         while True:
             time.sleep(0.1)
@@ -40,32 +41,41 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
                     meter_id, meter_count = value.split(":")
                     meter_count = int(meter_count)
                     
-                    default_meter = models.Meter.objects.get(id=int(meter_id))
-                    if not last_count_inserted.get(default_meter, None):
-                        latest_data = models.MeterData.objects.filter(meter=default_meter).order_by('-id')
+                    meter = models.Meter.objects.get(id=int(meter_id))
+                    if not last_count_inserted.get(meter_id, None):
+                        latest_data = models.MeterData.objects.filter(meter=meter).order_by('-id')
+                        diff = 1
+                        insert_count = 0
+                        latest_data_count = 0
                         if latest_data:
-                            latest_data_count = latest_data[0].data_point
+                            base_offset[meter_id] = latest_data[0].data_point
+                            latest_data_count = 0 #latest_data[0].data_point
                         else:
-                            latest_data_count = 0
+                            base_offset[meter_id] = 0
+
+                        insert_count = meter_count + base_offset[meter_id]
+                        diff = meter_count - latest_data_count
+                        
                     else:
-                        latest_data_count = last_count_inserted[default_meter]
-                    
-                    if meter_count > latest_data_count:
-                        insert_count = meter_count
-                    else:
-                        insert_count = meter_count - latest_data_count
+                        
+                        if meter_count > latest_data_count:
+                            latest_data_count = last_count_inserted[meter_id]
+                            insert_count = meter_count - latest_data_count + base_offset[meter_id]
+                            diff = insert_count - latest_data_count
+                        
+                        else:
+                            # Meter must have reset itself!
+                            latest_data_count = last_count_inserted[meter_id]
+                            insert_count = meter_count + base_offset[meter_id]
+                            diff = insert_count - latest_data_count
                         
                     data = models.MeterData(data_point=insert_count,
-                                            meter=default_meter,
-                                            created = datetime.now())
-                    
-                    # Set how much was incremented by...
-                    if latest_data_count:
-                        data.diff = latest_data_count - insert_count
-                    else:
-                        data.diff = 1
+                                            meter=meter,
+                                            created = datetime.now(),
+                                            diff=diff)
 
-                    last_count_inserted[default_meter] = insert_count
+                    last_count_inserted[meter_id] = meter_count
+                    base_offset[meter_id] = insert_count
                     print "Inserting value %d - received value %d" % (insert_count, meter_count)
                     data.save()
                     
@@ -84,7 +94,7 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
 
     def finish(self):
         print "Connection closed"
-        return MyTCPHandler.finish(self)
+        return SocketServer.BaseRequestHandler.finish(self)
     
 class Command(BaseCommand):
     args = ('--dummy')
