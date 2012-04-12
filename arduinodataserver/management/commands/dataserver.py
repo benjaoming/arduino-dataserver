@@ -52,9 +52,13 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
                             latest_data_count = 0 #latest_data[0].data_point
                         else:
                             base_offset[meter_id] = 0
-
-                        insert_count = meter_count + base_offset[meter_id]
-                        diff = meter_count - latest_data_count
+                        
+                        if meter_count < base_offset[meter_id]:
+                            insert_count = meter_count + base_offset[meter_id]
+                            diff = meter_count - latest_data_count
+                        else:
+                            insert_count = meter_count
+                            diff = meter_count - base_offset[meter_id]
                         
                     else:
                         
