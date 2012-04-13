@@ -97,7 +97,7 @@
                 <h4 class="span3">{{ meter.default_interval }}</h4>
                 <p class="pull-right">
                   {% for meter2 in meter.default_interval.meter_set.all %}
-                    <a class="btn btn-primary" href="{% url arduinodataserver_meter meter2.id %}">{{ meter2|capfirst }} &raquo;</a>
+                    <a class="btn btn-primary" href="{% url arduinodataserver_meter meter2.id %}">{{ meter2.name|capfirst }} &raquo;</a>
                   {% endfor %}
                 </p>
               </div>
@@ -115,7 +115,7 @@
       
         {% for meter in meters %}
         <div class="span4">
-          <h2>{{ meter }}</h2>
+          <h2>{{ meter.name }} <small>{{ meter.meter_type }}</h2>
           {{ meter.description|truncatewords:30|linebreaks }}
           <table class="table table-striped">  
             <tbody>  
