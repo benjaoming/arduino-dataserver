@@ -96,7 +96,7 @@
               <div class="carousel-caption">
                 <h4 class="span3">{{ meter.default_interval }}</h4>
                 <p class="pull-right">
-                  {% for meter2 meter.default_interval.meter_set.all %}
+                  {% for meter2 in meter.default_interval.meter_set.all %}
                     <a class="btn btn-primary" href="{% url arduinodataserver_meter meter2.id %}">{{ meter2|capfirst }} &raquo;</a>
                   {% endfor %}
                 </p>
