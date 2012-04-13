@@ -94,10 +94,10 @@
                 {% google_chart meter.default_interval %}
               </div>
               <div class="carousel-caption">
-                <h4 class="span2">{{ meter.default_interval }}</h4>
+                <h4 class="span3">{{ meter.default_interval }}</h4>
                 <p class="pull-right">
-                  {% for interval_type in meter.intervaltype_set.all %}
-                  <a class="btn btn-primary">{{ interval_type.get_name_display|capfirst }} summary &raquo;</a>
+                  {% for meter2 meter.default_interval.meter_set.all %}
+                    <a class="btn btn-primary" href="{% url arduinodataserver_meter meter2.id %}">{{ meter2|capfirst }} &raquo;</a>
                   {% endfor %}
                 </p>
               </div>
@@ -117,7 +117,7 @@
         <div class="span4">
           <h2>{{ meter }}</h2>
           {{ meter.description|truncatewords:30|linebreaks }}
-          <table class="table">  
+          <table class="table table-striped">  
             <tbody>  
               <tr>  
                 <td>{% trans "Latest update" %}:</td>  
