@@ -1,0 +1,50 @@
+{% extends "arduinodataserver/base.html" %}
+{% load i18n dataplotting %}
+
+{% block dataserver_content %}
+
+<h1>{{ meter.name }}</h1>
+
+{{ meter.description|linebreaks }}
+
+<h2>{% trans "Latest data" %}</h2>
+
+{% if meter.is_counter %}
+
+
+
+{% endif %}
+
+{% for interval_type in meter.intervaltype_set.all %}
+
+<h2>{{ interval_type }}</h2>
+<div class="row">
+  <div class="span3">
+    <h3>{% trans "Customize interval" %}</h3>
+    <p>{% trans "Set the start and the end of the X-axis to manipulate." %}</p>
+    <div class="well">
+      <label for="start_at">
+      {% trans "Start at:" %}
+      </label>
+		  <input type="text" class="datepicker" value="02/16/12" data-date-format="mm/dd/yy" id="start_at" />
+      <label for="end_at">
+      {% trans "End at:" %}
+      </label>
+		  <input type="text" class="datepicker" value="02/16/12" data-date-format="mm/dd/yy" id="end_at" />
+		  <input type="submit" value="{% trans "Change" %}" class="btn" />
+    </div>
+    <h3>{% trans "Download" %}</h3>
+    <p>{% trans "The graph cannot directly be rendered as an image file. But you can capture a screenshot or print a PDF." %}</p>
+  </div>
+  <div class="span9">
+    {% google_chart interval_type %}
+  </div>
+</div>
+
+{% endfor %}
+
+<script type="text/javascript">
+  $(function () {$('.datepicker').datepicker()});
+</script>
+
+{% endblock %}

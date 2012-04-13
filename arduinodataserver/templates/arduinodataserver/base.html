@@ -1,4 +1,4 @@
-<!DOCTYPE html>{% load i18n dataplotting %}
+<!DOCTYPE html>{% load i18n dataplotting summaries %}
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -9,6 +9,7 @@
 
     <!-- Le styles -->
     <link href="{{ STATIC_URL }}arduinodataserver/css/bootstrap.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}arduinodataserver/css/datepicker.css" rel="stylesheet">
     <style type="text/css">
       body {
         padding-top: 60px;
@@ -60,7 +61,19 @@
             <ul class="nav">
               <li class="active"><a href="#">{% trans "Overview" %}</a></li>
               {% for meter_type in meter_types %}
-                <li><a href="#about">{{ meter_type.name }}</a></li>
+                <li class="dropdown">
+                  <a href="#about" class="dropdown-toggle" data-toggle="dropdown">
+                    {{ meter_type.name }}
+                    <b class="caret"></b>
+                  </a>
+                  <ul class="dropdown-menu">
+                  {% for meter in meter_type.meter_set.all %}
+                    <li>
+                      <a href="{% url arduinodataserver_meter meter.id %}">{{ meter.name }}</a>
+                    </li>
+                  {% endfor %}
+                  </ul>
+                </li>
               {% endfor %}
             </ul>
           </div><!--/.nav-collapse -->
@@ -69,7 +82,8 @@
     </div>
 
     <div class="container">
-
+      
+      {% block dataserver_content %}
       <!-- Main hero unit for a primary marketing message or call to action -->
       <div class="hero-unit carousel" id="overview_carousel">
         <div class="carousel-inner" style="margin: 0 10px; min-height: 300px; overflow: hidden;">
@@ -108,11 +122,22 @@
               <tr>  
                 <td>{% trans "Latest update" %}:</td>  
                 <td>{{ meter.get_latest_data.created|default:_("None") }}</td>  
-              </tr>  
+              </tr>
+              {% if meter.is_counter %}
+              <tr>  
+                <td>{% trans "Last 5 minutes" %}:</td>  
+                <td>{% get_latest_minutes_sum meter 5 %} {{ meter.unit_name|default:"" }}</td>
+              </tr>
+              <tr>  
+                <td>{% trans "Last hour" %}:</td>  
+                <td>{% get_latest_minutes_sum meter 60 %} {{ meter.unit_name|default:"" }}</td>
+              </tr>
+              {% else %}
               <tr>  
                 <td>{% trans "Latest reading" %}:</td>  
-                <td>{{ meter.get_latest_data.data_point|default:_("None") }}</td>  
-              </tr>  
+                <td>{{ meter.get_latest_data.data_point|default:_("None") }} {{ meter.unit_name|default:"" }}</td>  
+              </tr>              
+              {% endif %}
               </tbody>
             </table>
           <p><a class="btn" href="#">View details &raquo;</a></p>
@@ -121,6 +146,7 @@
         {% endfor %}
       
       </div>
+      {% endblock %}
 
       <hr>
 
@@ -136,7 +162,10 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="{{ STATIC_URL }}arduinodataserver/js/bootstrap.min.js"></script>
+    <script src="{{ STATIC_URL }}arduinodataserver/js/bootstrap-dropdown.js"></script>
+    <script src="{{ STATIC_URL }}arduinodataserver/js/bootstrap-datepicker.js"></script>
     <script type="text/javascript">
+      $('.dropdown-toggle').dropdown()
       $('.carousel').carousel({
         interval: 100000000000000
       });

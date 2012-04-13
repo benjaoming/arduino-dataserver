@@ -4,6 +4,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = patterns('',
     url('^$', 'arduinodataserver.views.index', name='arduinodataserver_index'),
+    url('^meter/(\d+)/$', 'arduinodataserver.views.meter', name='arduinodataserver_meter'),
 )
 
 if settings.DEBUG:
