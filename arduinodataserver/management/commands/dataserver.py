@@ -21,7 +21,6 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
 
         data_received = "" # Store data from network
         last_count_inserted = {} # Buffer for latest values received from each meter
-        base_offset = {} # Base offset received from database, in case meter resets and database should keep counting upwards
         
         while True:
             time.sleep(0.1)
@@ -61,44 +60,26 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
                     # Check if we have a cached value - if not, find latest entry in database
                     if not last_count_inserted.get(meter_id, None):
                         
-                        diff = 1 # diff since last value
-                        insert_count = 0 # the value to insert
-                        latest_data_count = 0 # the latest value received from meter
-
                         # Find the latest data received in database
                         latest_data = models.MeterData.objects.filter(meter=meter).order_by('-id')
                         
                         if latest_data:
-                            base_offset[meter_id] = latest_data[0].data_point
+                            last_count_inserted[meter_id] = latest_data[0].data_point
                         else:
-                            base_offset[meter_id] = 0
+                            last_count_inserted[meter_id] = 0
                         
-                        # If database counter is ahead, then the meter must have been resting
-                        if meter_count < base_offset[meter_id]:
-                            insert_count = base_offset[meter_id] + 1
-                            diff = 1
-                        
-                        # If meter is ahead of database, then the server must have been resting
-                        else:
-                            insert_count = meter_count
-                            diff = meter_count - base_offset[meter_id]
+                    # If database counter is ahead, then the meter must have been reset
+                    if meter_count < last_count_inserted[meter_id]:
+                        insert_count = meter_count
+                        diff = meter_count
                     
-                    # Meter data already in last_count_inserted buffer
+                    # If meter is ahead of database, then the server must have been resting
                     else:
-                        
-                        # If the meter is ahead (normal case)
-                        latest_data_count = last_count_inserted[meter_id]
-                        if meter_count > latest_data_count:
-                            insert_count = meter_count - latest_data_count + base_offset[meter_id]
-                            diff = insert_count - latest_data_count
-                        
-                        # Meter must have reset itself!
-                        else:
-                            insert_count = meter_count + base_offset[meter_id]
-                            diff = 1
+                        insert_count = meter_count
+                        diff = meter_count - last_count_inserted[meter_id]
                     
                     # Insert data
-                    print "Inserting value %f - received value %f" % (insert_count, meter_count)
+                    print "Inserting value %f - received value %f - diff: %f" % (insert_count, meter_count, diff)
                     data = models.MeterData(data_point=insert_count,
                                             meter=meter,
                                             created = datetime.now(),
@@ -108,7 +89,6 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
 
                     # Store values
                     last_count_inserted[meter_id] = meter_count
-                    base_offset[meter_id] = insert_count
                     
                 except ValueError:
                     print "Not an integer", value

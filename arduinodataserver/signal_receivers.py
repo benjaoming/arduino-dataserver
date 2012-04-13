@@ -173,7 +173,7 @@ def create_interval_backlog(interval_type, **kwargs):
     
     import models
     
-    data_entries = models.MeterData.objects.filter(meter__in=interval_type.meter_set.all())
+    data_entries = models.MeterData.objects.filter(meter__in=[m.id for m in interval_type.meter_set.all()])
     if interval_type.backlog:
         now = datetime.now()
         from_time = now - timedelta(days=interval_type.backlog)
@@ -184,5 +184,5 @@ def create_interval_backlog(interval_type, **kwargs):
     
     # Iterate all data entries and add them in intervals
     for data in data_entries:
-        models.INTERVAL_FUNCTIONS[interval_type.name](models.MeterData, instance=data, interval=interval_type)    
+        models.INTERVAL_FUNCTIONS[interval_type.name](models.MeterData, instance=data, interval=interval_type)
     
