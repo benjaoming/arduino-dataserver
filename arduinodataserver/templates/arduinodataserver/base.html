@@ -56,7 +56,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand" href="#">{% block dataserver_sitetitle %}{% trans "Arduino Dataserver" %}{% endblock %}</a>
+          <a class="brand" href="{% url arduinodataserver_index %}">{% block dataserver_sitetitle %}{% trans "Arduino Dataserver" %}{% endblock %}</a>
           <div class="nav-collapse">
             <ul class="nav">
               <li class="active"><a href="#">{% trans "Overview" %}</a></li>
@@ -140,7 +140,7 @@
               {% endif %}
               </tbody>
             </table>
-          <p><a class="btn" href="#">View details &raquo;</a></p>
+          <p><a class="btn" href="{% url arduinodataserver_meter meter.id %}">View details &raquo;</a></p>
         </div>
         
         {% endfor %}
@@ -151,9 +151,11 @@
       <hr>
 
       <footer class="footer">
-        <p>&copy; Benjamin Bach 2012</p>
-        <p>{% trans "Arduino Dataserver is an open source project under " %}<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a>.</p>
-        <p>{% trans "This is Django dataserver running on Twitter Bootstrap." %}</p>
+        <p>&copy; Benjamin Bach 2012 <a href="https://github.com/benjaoming/arduino-dataserver">clone me @github</a></p>
+        <p>
+          {% trans "Arduino Dataserver is an open source project under " %}<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a>. <br />
+          {% trans "This is Arduino Dataserver running on Twitter Bootstrap." %}
+        </p>
       </footer>
 
     </div> <!-- /container -->

@@ -1,5 +1,5 @@
 {% extends "arduinodataserver/base.html" %}
-{% load i18n dataplotting %}
+{% load i18n dataplotting summaries %}
 
 {% block dataserver_content %}
 
@@ -7,16 +7,46 @@
 
 {{ meter.description|linebreaks }}
 
+{% if meter.is_counter %}
+<hr />
+
 <h2>{% trans "Latest data" %}</h2>
 
-{% if meter.is_counter %}
-
-
+<div class="row">
+  <div class="span4">
+    <div class="well">
+      <table class="table">  
+        <tbody>
+          <tr>  
+            <td>{% trans "Latest update" %}:</td>  
+            <td>{{ meter.get_latest_data.created|default:_("None") }}</td>  
+          </tr>
+          {% if meter.is_counter %}
+          <tr>  
+            <td>{% trans "Last 5 minutes" %}:</td>  
+            <td>{% get_latest_minutes_sum meter 5 %} {{ meter.unit_name|default:"" }}</td>
+          </tr>
+          <tr>  
+            <td>{% trans "Last hour" %}:</td>  
+            <td>{% get_latest_minutes_sum meter 60 %} {{ meter.unit_name|default:"" }}</td>
+          </tr>
+          {% else %}
+          <tr>  
+            <td>{% trans "Latest reading" %}:</td>  
+            <td>{{ meter.get_latest_data.data_point|default:_("None") }} {{ meter.unit_name|default:"" }}</td>  
+          </tr>              
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
 {% endif %}
 
 {% for interval_type in meter.intervaltype_set.all %}
 
+<hr />
 <h2>{{ interval_type }}</h2>
 <div class="row">
   <div class="span3">
@@ -37,7 +67,7 @@
     <p>{% trans "The graph cannot directly be rendered as an image file. But you can capture a screenshot or print a PDF." %}</p>
   </div>
   <div class="span9">
-    {% google_chart interval_type %}
+    {% google_chart interval_type 50 "300px" %}
   </div>
 </div>
 
