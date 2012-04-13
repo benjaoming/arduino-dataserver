@@ -56,7 +56,7 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
                     meter_count = float(meter_count)
                     
                     # Factor in some fraction to the unit that the meter has specified.
-                    meter_count = meter_count * meter.unit_fraction
+                    meter_count = meter_count
                     
                     # Check if we have a cached value - if not, find latest entry in database
                     if not last_count_inserted.get(meter_id, None):
@@ -87,8 +87,8 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
                     else:
                         
                         # If the meter is ahead (normal case)
+                        latest_data_count = last_count_inserted[meter_id]
                         if meter_count > latest_data_count:
-                            latest_data_count = last_count_inserted[meter_id]
                             insert_count = meter_count - latest_data_count + base_offset[meter_id]
                             diff = insert_count - latest_data_count
                         
@@ -98,11 +98,11 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
                             diff = 1
                     
                     # Insert data
-                    print "Inserting value %d - received value %d" % (insert_count, meter_count)
+                    print "Inserting value %f - received value %f" % (insert_count, meter_count)
                     data = models.MeterData(data_point=insert_count,
                                             meter=meter,
                                             created = datetime.now(),
-                                            diff = diff)
+                                            diff = diff * meter.unit_fraction)
 
                     data.save()
 
