@@ -39,8 +39,10 @@
         </tbody>
       </table>
     </div>
+    <h2>{% trans "Download" %}</h2>
+    <p>{% trans "Graphs cannot directly be rendered as an image file. But you can capture a screenshot or print this page as a PDF." %}</p>
   </div>
-  <div class="span8">
+  <div class="span8 noprint">
     <h2>{% trans "Add data" %}</h2>
     {% if user %}
     <div class="well">
@@ -108,8 +110,6 @@
 		  <input type="text" class="datepicker to_date" value="{% now "Y-m-d" %}" data-date-format="yyyy-mm-dd" />
 		  <input type="button" value="{% trans "Update graph" %}" class="btn" onclick="set_data_{{ interval_type.id }}($(this).siblings('.from_date').val(), $(this).siblings('.to_date').val(), 50)" />
     </div>
-    <h3>{% trans "Download" %}</h3>
-    <p>{% trans "The graph cannot directly be rendered as an image file. But you can capture a screenshot or print a PDF." %}</p>
   </div>
   <div class="span9">
     {% google_chart interval_type 50 "300px" "" interval_type.id  %}
