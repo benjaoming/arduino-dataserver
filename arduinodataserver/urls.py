@@ -5,6 +5,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 urlpatterns = patterns('',
     url('^$', 'arduinodataserver.views.index', name='arduinodataserver_index'),
     url('^meter/(\d+)/$', 'arduinodataserver.views.meter', name='arduinodataserver_meter'),
+    url('^interval/(\d+)/json/$', 'arduinodataserver.views.interval_json', name='arduinodataserver_interval_json'),
 )
 
 if settings.DEBUG:

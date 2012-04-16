@@ -3,29 +3,18 @@ from datetime import datetime
 from random import randint
 register = template.Library()
 
-def google_chart(interval_type, show_entries=20, height="250px", from_time=None, hide_unfinished=False):
+def google_chart(interval_type, show_entries=20, height="250px", from_time=None, chart_dom_ref=None):
     """
     Show the latest entries in an interval_type. By default it will
     show the latest 20 entries.
     """
-    from arduinodataserver import models
-    
-    intervals = models.Interval.objects.filter(interval_type=interval_type,)
-    
-    if hide_unfinished:
-        intervals = intervals.filter(to_time__lte=datetime.now())
-    if from_time:
-        intervals = intervals.filter(from_time__gte=from_time)
-    
-    intervals = intervals.order_by('-from_time')
-    intervals = intervals[:show_entries]
-    intervals = intervals.reverse()
     
     return {
         'interval_type': interval_type,
-        'intervals': intervals,
+        'from_time': from_time,
         'height': height,
-        'chart_id': randint(0,100000000000000),
+        'show_entries': show_entries,
+        'chart_dom_ref': randint(0,100000000000000) if not chart_dom_ref else chart_dom_ref,
     }
 register.inclusion_tag('arduinodataserver/includes/google_chart.html', takes_context=False)(google_chart)
 

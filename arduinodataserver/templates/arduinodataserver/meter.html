@@ -56,18 +56,18 @@
       <label for="start_at">
       {% trans "Start at:" %}
       </label>
-		  <input type="text" class="datepicker" value="02/16/12" data-date-format="mm/dd/yy" id="start_at" />
+		  <input type="text" class="datepicker from_date" value="{% now "Y-m-d" %}" data-date-format="yyyy-mm-dd" />
       <label for="end_at">
       {% trans "End at:" %}
       </label>
-		  <input type="text" class="datepicker" value="02/16/12" data-date-format="mm/dd/yy" id="end_at" />
-		  <input type="submit" value="{% trans "Change" %}" class="btn" />
+		  <input type="text" class="datepicker to_date" value="{% now "Y-m-d" %}" data-date-format="yyyy-mm-dd" />
+		  <input type="button" value="{% trans "Change" %}" class="btn" onclick="set_data_{{ interval_type.id }}($(this).siblings('.from_date').val(), $(this).siblings('.to_date').val(), 50)" />
     </div>
     <h3>{% trans "Download" %}</h3>
     <p>{% trans "The graph cannot directly be rendered as an image file. But you can capture a screenshot or print a PDF." %}</p>
   </div>
   <div class="span9">
-    {% google_chart interval_type 50 "300px" %}
+    {% google_chart interval_type 50 "300px" "" interval_type.id  %}
   </div>
 </div>
 

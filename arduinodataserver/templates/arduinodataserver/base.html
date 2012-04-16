@@ -129,7 +129,7 @@
                 <td>{% get_latest_minutes_sum meter 5 %} {{ meter.unit_name|default:"" }}</td>
               </tr>
               <tr>  
-                <td>{% trans "Last hour" %}:</td>  
+                <td>{% trans "Last 60 minutes" %}:</td>  
                 <td>{% get_latest_minutes_sum meter 60 %} {{ meter.unit_name|default:"" }}</td>
               </tr>
               {% else %}

@@ -132,6 +132,7 @@ class IntervalType(models.Model):
     class Meta:
         verbose_name = _(u"summary group")
         verbose_name_plural = _(u"summary groups")
+        ordering = ('name', 'verbose_name')
         
     def save(self, *args, **kwargs):
         

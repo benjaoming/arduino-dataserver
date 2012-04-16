@@ -1,27 +1,58 @@
 {% load dataplotting %}
-<div id="chart{{ chart_id }}" class="chartcontainer" style="width: 100%; height: {{ height }};"></div>
+<div id="chart{{ chart_dom_ref }}" class="chartcontainer" style="width: 100%; height: {{ height }};"></div>
 <script type="text/javascript">
+  
+  var set_data_{{ chart_dom_ref }};
+  
   $(function() {
-      var data = new google.visualization.DataTable();
-      data.addColumn('datetime', '');
-      data.addColumn('number', '{{ interval_type.unit_name }}');
-      data.addRows([
-        {% for interval in intervals %}
-        [new Date({{ interval.to_time.year }}, {{ interval.to_time.month }}-1, {{ interval.to_time.day }}, {{ interval.to_time.hour }}, {{ interval.to_time.minute }}, {{ interval.to_time.second }}+1), {{ interval.total|jsfloat:2 }}]{% if not forloop.last %},{% endif %}{% endfor %}
-      ]);
+
+      var jsonData = $.ajax({
+          {% if from_date %}
+          url: '{% url arduinodataserver_interval_json interval_type.id %}?from_date={{ from_date|date:"%Y-%m-%d" }}&entries={{ show_entries }}',
+          {% else %}
+          url: '{% url arduinodataserver_interval_json interval_type.id %}?entries={{ show_entries }}',
+          {% endif %}
+          dataType:"json",
+          async: false
+          }).responseText;
+          
+      var data = new google.visualization.DataTable(jsonData);
 
       var options = {
         title: '',
         legend: 'none',
         pointSize: 5,
         legend :'none',
-        axisFontSize : 0
-        
+        axisFontSize : 0,
+        animation:{
+           duration: 1000,
+           easing: 'out'
+        }        
       };
 
-      var chart = new google.visualization.AreaChart(document.getElementById('chart{{ chart_id }}'));
+      var chart = new google.visualization.AreaChart(document.getElementById('chart{{ chart_dom_ref }}'));
       chart.draw(data, options);
-      charts_redraw['chart{{ chart_id }}'] = [chart, data, options];
+      charts_redraw['chart{{ chart_dom_ref }}'] = [chart, data, options];
+      
+      set_data_{{ chart_dom_ref }} = function(from_date, to_date, entries) {
+        url = '{% url arduinodataserver_interval_json interval_type.id %}?';
+        if (from_date)
+          url += '&from_date='+from_date;
+        if (to_date)
+          url += '&to_date='+to_date;
+        if (entries)
+          url += '&entries='+entries;
+
+        var jsonData = $.ajax({
+            url: url,
+            dataType:"json",
+            async: false
+            }).responseText;
+            
+        var data = new google.visualization.DataTable(jsonData);
+        chart.draw(data, options);      
+      }
+      
     }
   );
 </script>
