@@ -10,6 +10,7 @@
     <!-- Le styles -->
     <link href="{{ STATIC_URL }}arduinodataserver/css/bootstrap.css" rel="stylesheet">
     <link href="{{ STATIC_URL }}arduinodataserver/css/datepicker.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}arduinodataserver/css/style.css" rel="stylesheet">
     <style type="text/css">
       body {
         padding-top: 60px;
@@ -82,6 +83,17 @@
     </div>
 
     <div class="container">
+      
+      {% if messages %}
+        <div class="row">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:"success" }} span4">
+            <a class="close" data-dismiss="alert">×</a>
+            {{ message|linebreaks }}
+          </div>
+        {% endfor %}
+        </div>
+      {% endif %}
       
       {% block dataserver_content %}
       <!-- Main hero unit for a primary marketing message or call to action -->

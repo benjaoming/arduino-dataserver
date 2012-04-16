@@ -1,9 +1,12 @@
 import models
-from django.shortcuts import render_to_response, get_object_or_404
+import forms
+from django.shortcuts import render_to_response, get_object_or_404, redirect
+from django.utils.translation import ugettext as _
 from django.template.context import RequestContext
 from datetime import datetime, date
 from django.core.serializers import json
 from django.http import HttpResponse
+from django.contrib import messages
 
 def render_to_response_and_add_context(template, c):
     meter_types = models.MeterType.objects.all().order_by("name")
@@ -26,7 +29,22 @@ def meter(request, meter_id):
     
     meter = get_object_or_404(models.Meter, id=meter_id)
     
+    if request.method == 'POST':
+        data_form = forms.MeterDataForm(request.POST)
+        if data_form.is_valid():
+            data = data_form.save(commit=False)
+            data.meter = meter
+            data.created = datetime.combine(data_form.cleaned_data['created_date'],
+                                            data_form.cleaned_data['created_time'])
+            data.save()
+            messages.success(request, _(u"Data entry added and summaries updated!"))
+            return redirect('arduinodataserver_meter', meter.id)
+    else:
+        data_form = forms.MeterDataForm(initial={'created_date': datetime.now().date,
+                                                 'data_point': 0.0})
+    
     c = RequestContext(request, {'meter': meter,
+                                 'data_form': data_form,
                                  })
     return render_to_response_and_add_context("arduinodataserver/meter.html", c)    
 

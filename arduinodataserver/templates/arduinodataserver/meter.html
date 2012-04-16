@@ -2,18 +2,18 @@
 {% load i18n dataplotting summaries %}
 
 {% block dataserver_content %}
-
-<h1>{{ meter.name }}</h1>
+<div class="page-header">
+  <h1>{{ meter.name }} <small>{{ meter.meter_type }}</small></h1>
+</div>
 
 {{ meter.description|linebreaks }}
 
 {% if meter.is_counter %}
-<hr />
-
-<h2>{% trans "Latest data" %}</h2>
 
 <div class="row">
+
   <div class="span4">
+    <h2>{% trans "Latest data" %}</h2>
     <div class="well">
       <table class="table table-striped">  
         <tbody>
@@ -40,6 +40,51 @@
       </table>
     </div>
   </div>
+  <div class="span8">
+    <h2>{% trans "Add data" %}</h2>
+    {% if user %}
+    <div class="well">
+    
+      <form method="POST">
+        {% csrf_token %}
+        <div class="row">
+          <div class="span3">
+            <p>
+              {{ data_form.created_date.errors }}
+              {{ data_form.created_date.label_tag }}
+              {{ data_form.created_date }}
+            </p>
+            <p>
+              {{ data_form.created_time.errors }}
+              {{ data_form.created_time.label_tag }}
+              {{ data_form.created_time }}
+            </p>
+          </div>
+          <div class="span3">
+            <p>
+              {{ data_form.data_point.errors }}
+              {{ data_form.data_point.label_tag }}
+              {{ data_form.data_point }}
+            </p>
+            {% if meter.is_counter %}
+            <p>
+              {{ data_form.diff.errors }}
+              {{ data_form.diff.label_tag }}
+              {{ data_form.diff }}
+              <span class="helptext">{{ data_form.diff.help_text }}</span>
+            </p>
+            {% endif %}
+          </div>
+        </div>
+        <input type="submit" class="btn btn-primary" value="{% trans "Add and update graphs" %}" />
+      
+      </form>
+    
+    </div>
+    {% else %}
+    <p><i>{% trans "You must be logged in" %}</i></p>    
+    {% endif %}
+  </div>
 </div>
 
 {% endif %}
@@ -61,7 +106,7 @@
       {% trans "End at:" %}
       </label>
 		  <input type="text" class="datepicker to_date" value="{% now "Y-m-d" %}" data-date-format="yyyy-mm-dd" />
-		  <input type="button" value="{% trans "Change" %}" class="btn" onclick="set_data_{{ interval_type.id }}($(this).siblings('.from_date').val(), $(this).siblings('.to_date').val(), 50)" />
+		  <input type="button" value="{% trans "Update graph" %}" class="btn" onclick="set_data_{{ interval_type.id }}($(this).siblings('.from_date').val(), $(this).siblings('.to_date').val(), 50)" />
     </div>
     <h3>{% trans "Download" %}</h3>
     <p>{% trans "The graph cannot directly be rendered as an image file. But you can capture a screenshot or print a PDF." %}</p>

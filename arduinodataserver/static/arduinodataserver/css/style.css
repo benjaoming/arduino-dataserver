@@ -1,0 +1,23 @@
+ul.errorlist
+{
+  list-style-type: none;
+  text-indent: 0;
+  padding: 5px;
+  margin: 10px 0;
+  background: #C33;
+  color: #FFF;
+}
+
+ul.errorlist li
+{
+  list-style-type: none;
+  text-indent: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.helptext
+{
+  display: block;
+  font-size: 80%;
+}
