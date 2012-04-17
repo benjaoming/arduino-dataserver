@@ -66,7 +66,7 @@ def interval_json(request, interval_type_id, max_entries=24, hide_unfinished=0):
     intervals = intervals.order_by('-from_time')
     max_entries = max_entries or request.GET.get('entries', None)
     if max_entries:
-        intervals = intervals[:max_entries]
+        intervals = intervals[:int(max_entries)]
     intervals.reverse()
 
     def get_google_date(datetimeobj):
