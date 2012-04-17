@@ -108,7 +108,7 @@
       {% trans "End at:" %}
       </label>
 		  <input type="text" class="datepicker to_date" value="{% now "Y-m-d" %}" data-date-format="yyyy-mm-dd" />
-		  <input type="button" value="{% trans "Update graph" %}" class="btn" onclick="set_data_{{ interval_type.id }}($(this).siblings('.from_date').val(), $(this).siblings('.to_date').val(), 50)" />
+		  <input type="button" value="{% trans "Update graph" %}" class="btn" onclick="set_data_{{ interval_type.id }}($(this).siblings('.from_date').val(), $(this).siblings('.to_date').val(), 1000)" />
     </div>
   </div>
   <div class="span9">
