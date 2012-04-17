@@ -70,17 +70,22 @@ def interval_json(request, interval_type_id, max_entries=24, hide_unfinished=0):
     intervals.reverse()
 
     def get_google_date(datetimeobj):
-        return "Date(%d, %d, %d, %d, %d, %d, %d)" % (datetimeobj.year,
-                                                     datetimeobj.month-1,
-                                                     datetimeobj.day,
-                                                     datetimeobj.hour,
-                                                     datetimeobj.minute,
-                                                     datetimeobj.second+1,
-                                                     datetimeobj.microsecond/1000) 
-    
+        if interval_type.name == models.INTERVAL_HOURLY:
+            return "Date(%d, %d, %d, %d, %d, %d, %d)" % (datetimeobj.year,
+                                                         datetimeobj.month-1,
+                                                         datetimeobj.day,
+                                                         datetimeobj.hour,
+                                                         datetimeobj.minute,
+                                                         datetimeobj.second+1,
+                                                         datetimeobj.microsecond/1000) 
+        else:
+            return "Date(%d, %d, %d,)" % (datetimeobj.year,
+                                          datetimeobj.month-1,
+                                          datetimeobj.day, )
+            
     data = json.simplejson.dumps({
              "cols": [
-                      {"id": "","label": "", "pattern": "", "type": "datetime"},
+                      {"id": "","label": "", "pattern": "", "type": "datetime" if interval_type.name == models.INTERVAL_HOURLY else "date"},
                       {"id": "","label": interval_type.unit_name, "pattern": "", "type":"number"}
                       ],
              "rows": [({"c": [{"v": get_google_date(i.to_time)},
