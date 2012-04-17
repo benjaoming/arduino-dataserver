@@ -79,7 +79,7 @@ def interval_json(request, interval_type_id, max_entries=24, hide_unfinished=0):
                                                          datetimeobj.second+1,
                                                          datetimeobj.microsecond/1000) 
         else:
-            return "Date(%d, %d, %d,)" % (datetimeobj.year,
+            return "Date(%d, %d, %d)" % (datetimeobj.year,
                                           datetimeobj.month-1,
                                           datetimeobj.day, )
             
