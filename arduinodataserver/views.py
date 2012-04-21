@@ -36,12 +36,15 @@ def meter(request, meter_id):
             data.meter = meter
             data.created = datetime.combine(data_form.cleaned_data['created_date'],
                                             data_form.cleaned_data['created_time'])
+            
+            request.session['created_date'] = data_form.cleaned_data['created_date']
+            
             data.save()
             messages.success(request, _(u"Data entry added and summaries updated!"))
             return redirect('arduinodataserver_meter', meter.id)
     else:
-        data_form = forms.MeterDataForm(initial={'created_date': datetime.now().date,
-                                                 'data_point': 0.0})
+        data_form = forms.MeterDataForm(initial={'created_date': request.session.get('created_date', datetime.now().date),
+                                                 'created_time': datetime.now().time,})
     
     c = RequestContext(request, {'meter': meter,
                                  'data_form': data_form,
