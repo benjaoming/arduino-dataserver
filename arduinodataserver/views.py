@@ -84,6 +84,8 @@ def interval_json(request, interval_type_id, max_entries=24, hide_unfinished=0):
                                                          datetimeobj.minute,
                                                          datetimeobj.second+1,
                                                          datetimeobj.microsecond/1000) 
+        elif interval_type.name == models.INTERVAL_ANNUAL:
+            return "%d" % (datetimeobj.year,) 
         else:
             return "Date(%d, %d, %d)" % (datetimeobj.year,
                                           datetimeobj.month-1,
@@ -94,7 +96,7 @@ def interval_json(request, interval_type_id, max_entries=24, hide_unfinished=0):
                       {"id": "","label": "", "pattern": "", "type": "datetime" if interval_type.name == models.INTERVAL_HOURLY else "date"},
                       {"id": "","label": interval_type.unit_name, "pattern": "", "type":"number"}
                       ],
-             "rows": [({"c": [{"v": get_google_date(i.to_time)},
+             "rows": [({"c": [{"f": get_google_date(i.to_time)},
                               {"v": i.total}]}) for i in intervals],
            })
     return HttpResponse(data, mimetype='application/json')

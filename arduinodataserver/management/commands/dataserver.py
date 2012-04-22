@@ -44,12 +44,15 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
             # Throw away empty stuff
             values_received = filter(lambda x: x!="", values_received)
             
+            # Split by ":"
+            values_received = map(lambda x: x.split(":"), values_received)
+            
+            # Sort values so we start with the smallest ones
+            values_received.sort(key=lambda x:x[1])
+            
             # Iterate the values
-            for value in values_received:
+            for meter_id, meter_count in values_received:
                 try:
-                    
-                    # Values received: "meter_id:meter_value", ie. "1:1;"
-                    meter_id, meter_count = value.split(":")
                     
                     meter = models.Meter.objects.get(id=int(meter_id))
                     meter_count = float(meter_count)

@@ -40,6 +40,7 @@ INTERVAL_FUNCTIONS = {
 class MeterType(models.Model):
     
     name = models.CharField(max_length=255,)
+    #color = models.CharField(max_length=18, default='')
     
     def __unicode__(self):
         return self.name

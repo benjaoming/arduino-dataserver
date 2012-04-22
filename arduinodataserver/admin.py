@@ -9,7 +9,7 @@ class DataAdmin(admin.ModelAdmin):
     list_filter = ('meter', 'created')
 
 class IntervalAdmin(admin.ModelAdmin):
-    list_display = ('interval_type', 'get_total', 'from_time')
+    list_display = ('interval_type', 'get_total', 'from_time', 'to_time')
     list_filter = ('interval_type', 'from_time', 'interval_type__meter_set', 'interval_type__meter_set__meter_type',)
 
 class IntervalTypeAdmin(admin.ModelAdmin):
