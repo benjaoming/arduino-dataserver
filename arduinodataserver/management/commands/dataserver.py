@@ -34,8 +34,8 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
             
             # Secure against data overflow / dos attacks
             # In case we get too much data, just drop the connection
-            if len(data_received) > 5000:
-                return
+            #if len(data_received) > 5000:
+            #    return
             
             # If we have not concluded receiving
             if not values_received or not "" == values_received[-1]:

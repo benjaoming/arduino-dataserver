@@ -84,7 +84,7 @@ def interval_json(request, interval_type_id, max_entries=24, hide_unfinished=0):
                                                          datetimeobj.minute,
                                                          datetimeobj.second+1,
                                                          datetimeobj.microsecond/1000) 
-        elif interval_type.name == models.INTERVAL_ANNUAL:
+        elif interval_type.name == models.INTERVAL_ANNUALLY:
             return "%d" % (datetimeobj.year,) 
         else:
             return "Date(%d, %d, %d)" % (datetimeobj.year,
