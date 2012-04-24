@@ -84,19 +84,34 @@ def interval_json(request, interval_type_id, max_entries=24, hide_unfinished=0):
                                                          datetimeobj.minute,
                                                          datetimeobj.second+1,
                                                          datetimeobj.microsecond/1000) 
-        elif interval_type.name == models.INTERVAL_ANNUALLY:
-            return "%d" % (datetimeobj.year,) 
         else:
             return "Date(%d, %d, %d)" % (datetimeobj.year,
                                           datetimeobj.month-1,
                                           datetimeobj.day, )
-            
+
+    def get_google_label(from_time, to_time):            
+        if interval_type.name == models.INTERVAL_ANNUALLY:
+            return "%d" % from_time.year
+        elif interval_type.name == models.INTERVAL_HOURLY:
+            from django.template.defaultfilters import date, time
+            return "%s %s-%s" % (date(to_time, "DATE_FORMAT").title(), time(from_time, "TIME_FORMAT"), time(to_time, "TIME_FORMAT"))
+        elif interval_type.name == models.INTERVAL_DAILY:
+            from django.template.defaultfilters import date, time
+            return "%s" % date(to_time, "DATE_FORMAT").title()
+        elif interval_type.name == models.INTERVAL_WEEKLY:
+            from django.template.defaultfilters import date, time
+            return "%s - %s" % (date(from_time, "DATE_FORMAT").title(), date(from_time, "DATE_FORMAT").title())
+        elif interval_type.name == models.INTERVAL_MONTHLY:
+            from django.template.defaultfilters import date, time
+            return "%s" % date(from_time, "F Y").title()
+        return None 
+
     data = json.simplejson.dumps({
              "cols": [
                       {"id": "","label": "", "pattern": "", "type": "datetime" if interval_type.name == models.INTERVAL_HOURLY else "date"},
                       {"id": "","label": interval_type.unit_name, "pattern": "", "type":"number"}
                       ],
-             "rows": [({"c": [{"v": get_google_date(i.to_time)},
+             "rows": [({"c": [{"v": get_google_date(i.to_time), 'f': get_google_label(i.from_time, i.to_time)},
                               {"v": i.total}]}) for i in intervals],
            })
     return HttpResponse(data, mimetype='application/json')

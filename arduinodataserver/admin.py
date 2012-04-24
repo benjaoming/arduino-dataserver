@@ -4,7 +4,7 @@ import models
 
 class DataAdmin(admin.ModelAdmin):
     list_display = ('meter', 'created', 
-                    'data_point')
+                    'data_point', 'diff')
     
     list_filter = ('meter', 'created')
 

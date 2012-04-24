@@ -143,8 +143,9 @@ def recalculate_interval(meter, name_id, from_time, interval=None):
     if meter_data:
         total_diff = meter_data.get('total_diffs', 0)
     else:
-        total_diff = 0
-    
+        # TODO: Do nothing or normalize?
+        return
+
     # Only use one kind of interval
     if interval:
         interval_types = [interval]
@@ -154,17 +155,11 @@ def recalculate_interval(meter, name_id, from_time, interval=None):
 
     for interval_type in interval_types:
         
-        try:
-            interval = models.Interval.objects.get(from_time=from_time, 
-                                                   interval_type=interval_type,
-                                                   )
-            interval.total = interval.total + (total_diff * interval_type.unit_fraction)
-    
-        except models.Interval.DoesNotExist:
-            interval = models.Interval(from_time=from_time,
-                                       interval_type=interval_type)
-            interval.total = (total_diff * interval_type.unit_fraction)
-        
+        models.Interval.objects.filter(from_time=from_time, 
+                                       interval_type=interval_type).delete()
+        interval = models.Interval(from_time=from_time,
+                                   interval_type=interval_type)
+        interval.total = (total_diff * interval_type.unit_fraction)
         interval.save()
     
 
@@ -173,7 +168,7 @@ def create_interval_backlog(interval_type, **kwargs):
     
     import models
     
-    data_entries = models.MeterData.objects.filter(meter__in=[m.id for m in interval_type.meter_set.all()])
+    data_entries = models.MeterData.objects.filter(meter__in=[m.id for m in interval_type.meter_set.all()]).order_by('-created')
     if interval_type.backlog:
         now = datetime.now()
         from_time = now - timedelta(days=interval_type.backlog)
@@ -183,6 +178,7 @@ def create_interval_backlog(interval_type, **kwargs):
     models.Interval.objects.filter(interval_type=interval_type).delete()
     
     # Iterate all data entries and add them in intervals
+    # TODO: It should not iterate data_entries but simply call recalculate_interval for each period available
     for data in data_entries:
         models.INTERVAL_FUNCTIONS[interval_type.name](models.MeterData, instance=data, interval=interval_type)
     
