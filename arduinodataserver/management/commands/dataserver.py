@@ -48,7 +48,10 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
             values_received = map(lambda x: x.split(":"), values_received)
             
             # Sort values so we start with the smallest ones
-            values_received.sort(key=lambda x:x[1])
+            try:
+                values_received.sort(key=lambda x:x[1])
+            except IndexError:
+                continue
             
             # Iterate the values
             for meter_id, meter_count in values_received:
