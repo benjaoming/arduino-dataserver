@@ -29,6 +29,8 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
             
             data_received += self.data
             
+            print "Data received: %s" % data_received
+            
             # Split values at our termination character
             values_received = data_received.split(";")
             
@@ -51,6 +53,7 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
             try:
                 values_received.sort(key=lambda x:x[1])
             except IndexError:
+                print "Value not correctly encoded (d:d; e.g. 1:1;)"
                 continue
             
             # Iterate the values
@@ -97,7 +100,7 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
                     last_count_inserted[meter_id] = meter_count
                     
                 except ValueError:
-                    print "Not an integer", value
+                    print "Not an integer", meter_id, meter_count
                     return
                 except IndexError:
                     print "No meter value received -- must be ID:VALUE"
