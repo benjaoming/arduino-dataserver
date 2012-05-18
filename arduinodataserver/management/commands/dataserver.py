@@ -154,7 +154,8 @@ class Command(BaseCommand):
                 sys.exit(0)
 
         # Create the server, binding to localhost on port 9999
-        SocketServer.TCPServer.allow_reuse_address = True
+        
+        #SocketServer.TCPServer.allow_reuse_address = True
         server = SocketServer.TCPServer((HOST, PORT), MyTCPHandler)
 
         server_thread = threading.Thread(target=server.serve_forever, args=())
